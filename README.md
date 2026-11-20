@@ -163,4 +163,3 @@ hackkumbh/
 
 ---
 
-*Made with ❤️ for HackKumbh — Nagpur Municipal Corporation*
