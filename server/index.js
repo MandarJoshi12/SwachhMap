@@ -1,15 +1,15 @@
 'use strict';
-const express  = require('express');
-const cors     = require('cors');
-const path     = require('path');
-const fs       = require('fs');
-const multer   = require('multer');
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+const fs = require('fs');
+const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
 const initSqlJs = require('sql.js');
 
-const app        = express();
-const PORT       = 3001;
-const DB_PATH    = path.join(__dirname, 'db', 'swachhmap.db');
+const app = express();
+const PORT = 3001;
+const DB_PATH = path.join(__dirname, 'db', 'swachhmap.db');
 const UPLOADS_DIR = path.join(__dirname, '..', 'uploads');
 
 if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
@@ -27,7 +27,7 @@ function daysAgo(n) {
   return d.toISOString().replace('T', ' ').substring(0, 19);
 }
 function scatter(base, r) { return base + (Math.random() * r * 2 - r); }
-function pick(arr)        { return arr[Math.floor(Math.random() * arr.length)]; }
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
 // ── Main async init ───────────────────────────────────────────────────────────
 async function main() {
@@ -85,9 +85,9 @@ async function main() {
   app.get('/api/tickets', (req, res) => {
     let q = 'SELECT * FROM tickets WHERE 1=1';
     const params = [];
-    if (req.query.ward_id)  { q += ' AND ward_id=?';  params.push(Number(req.query.ward_id)); }
-    if (req.query.status)   { q += ' AND status=?';    params.push(req.query.status); }
-    if (req.query.severity) { q += ' AND severity=?';  params.push(Number(req.query.severity)); }
+    if (req.query.ward_id) { q += ' AND ward_id=?'; params.push(Number(req.query.ward_id)); }
+    if (req.query.status) { q += ' AND status=?'; params.push(req.query.status); }
+    if (req.query.severity) { q += ' AND severity=?'; params.push(Number(req.query.severity)); }
     q += ' ORDER BY created_at DESC';
     res.json(dbAll(q, params));
   });
@@ -122,7 +122,7 @@ async function main() {
     const fields = { ...req.body };
     if (req.file) fields.photo_after = `/uploads/${req.file.filename}`;
     if (fields.status === 'cleaned') fields.resolved_at = new Date().toISOString().replace('T', ' ').substring(0, 19);
-    const sets   = Object.keys(fields).map(k => `${k}=?`).join(', ');
+    const sets = Object.keys(fields).map(k => `${k}=?`).join(', ');
     const values = Object.values(fields);
     dbRun(`UPDATE tickets SET ${sets} WHERE id=?`, [...values, tid]);
     if (fields.status === 'cleaned' && ticket.citizen_phone) {
@@ -234,18 +234,18 @@ async function main() {
 
   // ── Simulate ──────────────────────────────────────────────────────────────────
   app.get('/api/simulate', (req, res) => {
-    const categories = ['garbage_dump','overflowing_bin','blocked_drain','stagnant_water'];
-    const durations  = ['1-3 days','about a week','2+ weeks'];
+    const categories = ['garbage_dump', 'overflowing_bin', 'blocked_drain', 'stagnant_water'];
+    const durations = ['1-3 days', 'about a week', '2+ weeks'];
     const wards = dbAll('SELECT * FROM wards');
-    const ward  = pick(wards);
+    const ward = pick(wards);
     const phone = `9${Math.floor(Math.random() * 900000000 + 100000000)}`;
-    const sla   = new Date(Date.now() + 72 * 3600 * 1000).toISOString().replace('T', ' ').substring(0, 19);
+    const sla = new Date(Date.now() + 72 * 3600 * 1000).toISOString().replace('T', ' ').substring(0, 19);
     const { lastInsertRowid } = dbRun(
       `INSERT INTO tickets (lat,lng,ward_id,category,duration_bucket,severity,status,citizen_phone,sla_deadline)
        VALUES (?,?,?,?,?,?,?,?,?)`,
       [scatter(ward.center_lat, 0.005), scatter(ward.center_lng, 0.005),
-       ward.id, pick(categories), pick(durations), Math.ceil(Math.random() * 3),
-       'open', phone, sla]
+      ward.id, pick(categories), pick(durations), Math.ceil(Math.random() * 3),
+        'open', phone, sla]
     );
     res.json({ message: 'Simulated ticket created', ticket_id: lastInsertRowid, ward: ward.name });
   });
