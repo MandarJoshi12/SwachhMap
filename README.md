@@ -1,7 +1,6 @@
 # SwachhMap 🗺️
 
 > **A civic sanitation tracker for Nagpur Municipal Corporation (NMC)**  
-> Built as a hackathon prototype for HackKumbh
 
 ---
 
